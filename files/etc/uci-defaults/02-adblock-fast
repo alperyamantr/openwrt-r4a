@@ -1,8 +1,4 @@
 #!/bin/sh
 # /etc/uci-defaults/02-adblock-fast
-# adblock-fast servisini boot'ta calissin diye enable et.
-# Hagezi Light URL'sini ilk boot sonrasi LuCI'den (Services > AdBlock-Fast)
-# gir — bkz. docs/PROJECT_CONTEXT.md, paketin UCI semasi yakin zamanda
-# degisti, statik bir config dosyasi riskli.
 /etc/init.d/adblock-fast enable 2>/dev/null || true
 exit 0

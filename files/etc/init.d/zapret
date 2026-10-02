@@ -15,8 +15,8 @@ start_service() {
     stop_service > /dev/null 2>&1
     modprobe -q nfnetlink_queue 2>/dev/null
 
-    sysctl -w net.netfilter.nf_conntrack_max=4096 >/dev/null 2>&1 || true
-    sysctl -w net.netfilter.nfnetlink_queue_maxlen=1024 >/dev/null 2>&1 || true
+    sysctl -w net.netfilter.nf_conntrack_max=8192 >/dev/null 2>&1 || true
+    sysctl -w net.netfilter.nfnetlink_queue_maxlen=2048 >/dev/null 2>&1 || true
     sysctl -w net.core.netdev_max_backlog=1024 >/dev/null 2>&1 || true
     sysctl -w net.netfilter.nf_conntrack_udp_timeout_stream=45 >/dev/null 2>&1 || true
 
