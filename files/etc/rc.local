@@ -14,8 +14,8 @@
 chmod +x /opt/zapret/nfqws 2>/dev/null
 
 # Gercek WAN Arayuzu
-IFACE="eth1"          # TODO: verify real WAN interface name
-RATE="270000kbit"     # TODO: set to (line speed in Mbps * 900)kbit
+IFACE="eth1"          # R4A WAN: native eth1 port
+RATE="270000kbit"     # TODO: set to (line speed in Mbps * 900)kbit -- default=300Mbps
 VIP_RATE="300kbit"    # unchanged from C50v6 — still enough guaranteed BW for game/voice
 
 # Alias Tanimlama (SSH'ta 'cs2' veya 'qos' yazip izlemek icin)

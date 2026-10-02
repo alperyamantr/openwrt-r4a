@@ -6,7 +6,7 @@ config interface 'loopback'
 	list ipaddr '127.0.0.1/8'
 
 config globals 'globals'
-	option packet_steering '0'
+	option packet_steering '1'
 	option udp_conntrack_timeout '180'
 	option udp_conntrack_timeout_stream '180'
 
@@ -18,7 +18,7 @@ config interface 'lan'
 	option metric '99'
 
 config interface 'wan'
-	option device 'eth0.2'
+	option device 'eth1'
 	option proto 'dhcp'
 	option peerdns '0'
 	option ipv6 '0'
@@ -27,30 +27,12 @@ config interface 'wan'
 	list dns '94.140.14.14'
 	list dns '94.140.15.15'
 
-config switch
-	option name 'switch0'
-	option reset '1'
-	option enable_vlan '1'
-
-config switch_vlan
-	option device 'switch0'
-	option vlan '1'
-	option ports '1 2 3 4 6t'
-
-config switch_vlan
-	option device 'switch0'
-	option vlan '2'
-	option ports '0 6t'
-
 config device
 	option name 'br-lan'
 	option type 'bridge'
-	list ports 'eth0.1'
+	list ports 'eth0'
 	option ipv6 '0'
 
 config device
-	option name 'eth0.2'
-	option type '8021q'
-	option ifname 'eth0'
-	option vid '2'
+	option name 'eth1'
 	option ipv6 '0'

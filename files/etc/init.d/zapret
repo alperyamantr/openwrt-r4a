@@ -5,9 +5,9 @@ USE_PROCD=1
 
 FLOWOFFLOAD="software"
 QUIC_MODE="desync"
-WAN_IF="eth1"   # TODO: verify real WAN interface name on R4A via `ip a` after first boot (was eth0.2 on C50v6's switch-VLAN setup, R4A has separate WAN/LAN ports)
+WAN_IF="eth1"   # R4A native WAN port (separate physical port, no VLAN unlike C50v6)
 LAN_IF="br-lan"
-QUEUE_PKTS=4
+QUEUE_PKTS=6
 NFQWS_BIN="/opt/zapret/nfqws"
 FAKE_DIR="/opt/zapret/files/fake"
 
@@ -20,7 +20,7 @@ start_service() {
     sysctl -w net.core.netdev_max_backlog=1024 >/dev/null 2>&1 || true
     sysctl -w net.netfilter.nf_conntrack_udp_timeout_stream=45 >/dev/null 2>&1 || true
 
-    local NFQWS_ARGS="--qnum=80 --user=daemon --bind-fix4 \
+    local NFQWS_ARGS="--qnum=80 --threads=2 --user=daemon --bind-fix4 \
     --filter-tcp=443 \
     --dpi-desync=fake,split \
     --dpi-desync-split-pos=1 \
