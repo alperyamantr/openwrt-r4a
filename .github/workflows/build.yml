@@ -16,12 +16,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Cache OpenWrt feeds & dl
+      - name: Cache OpenWrt dl
         uses: actions/cache@v4
         with:
-          path: |
-            openwrt/dl
-            openwrt/feeds
+          path: openwrt/dl
           key: openwrt-${{ env.OPENWRT_VERSION }}-${{ hashFiles('profiles/packages.txt') }}
           restore-keys: |
             openwrt-${{ env.OPENWRT_VERSION }}-
@@ -36,11 +34,13 @@ jobs:
 
       - name: Clone OpenWrt
         run: |
-          if [ -d "openwrt" ]; then
-            echo "==> openwrt directory exists (from cache), cleaning up before clone..."
-            rm -rf openwrt
+          git clone --depth=1 --branch ${OPENWRT_VERSION} https://github.com/openwrt/openwrt.git openwrt-src
+          if [ -d openwrt/dl ]; then
+            echo "==> Restoring dl cache into fresh clone"
+            mv openwrt/dl openwrt-src/dl
           fi
-          git clone --depth=1 --branch ${OPENWRT_VERSION} https://github.com/openwrt/openwrt.git
+          rm -rf openwrt
+          mv openwrt-src openwrt
 
       - name: Update feeds
         working-directory: openwrt
@@ -82,6 +82,8 @@ jobs:
           grep -q "^CONFIG_PACKAGE_kmod-zram=y$" .config || (echo "ERROR: kmod-zram missing!" && exit 1)
           grep -q "^CONFIG_PACKAGE_zram-swap=y$" .config || (echo "ERROR: zram-swap missing!" && exit 1)
           grep -q "^CONFIG_PACKAGE_luci-app-adblock-fast=y$" .config || (echo "ERROR: luci-app-adblock-fast missing!" && exit 1)
+          grep -q "^CONFIG_PACKAGE_uhttpd-mod-ubus=y$" .config || (echo "ERROR: uhttpd-mod-ubus missing!" && exit 1)
+          grep -q "^CONFIG_PACKAGE_luci-theme-openwrt=y$" .config || (echo "ERROR: LuCI theme missing!" && exit 1)
           echo "OK: all critical packages present"
 
       - name: Show target
