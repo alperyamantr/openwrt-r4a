@@ -1,4 +1,14 @@
-# KORU
+# openwrt-r4a/profiles/packages.txt
+# Ported from openwrt-c50v6's packages.txt almost unchanged — same RAM-conscious
+# philosophy (tc-tiny not tc-full/cake, opkg stripped, USB/ipv6/tunnel modules
+# stripped) even though R4A has 2x the RAM. Only real addition: luci-app-adblock-fast
+# (+ its adblock-fast dependency), which replaces C50v6's manual hagezi_init /
+# hagezi-guncelle / /tmp-symlink mechanism entirely — configure the Hagezi Light
+# list URL via LuCI after first boot (package's UCI schema changed recently
+# upstream, a shipped static config risks a uci parse error, safer to set via
+# the actual installed package's UI/defaults).
+
+# --- KORU (C50v6'dan birebir) ---
 luci-base
 luci-mod-admin-full
 luci-mod-network
@@ -25,7 +35,10 @@ iptables-mod-nfqueue
 libnetfilter-queue
 tc-tiny
 
-# ÇIKAR (Optimizasyon & Güvenlik)
+# --- YENİ EKLENEN: adblock-fast (hagezi_init/hagezi-guncelle'nin yerine) ---
+luci-app-adblock-fast
+
+# --- ÇIKAR (Optimizasyon & Güvenlik, C50v6'dan birebir) ---
 -ca-bundle
 -uhttpd-mod-ubus
 -luci-i18n-base-en
@@ -63,7 +76,7 @@ tc-tiny
 -luci-theme-bootstrap
 -kmod-sched-cake
 
-# ZATEN ÇIKARILMIŞ / PASİF
+# --- ZATEN ÇIKARILMIŞ / PASİF (C50v6'dan birebir) ---
 -luci-app-package-manager
 -luci-proto-ipv6
 -luci-proto-ppp

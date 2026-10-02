@@ -1,5 +1,0 @@
-#!/bin/sh
-# /etc/uci-defaults/02-hagezi
-# hagezi_init servisini boot'ta calissin diye enable et
-/etc/init.d/hagezi_init enable 2>/dev/null || true
-exit 0

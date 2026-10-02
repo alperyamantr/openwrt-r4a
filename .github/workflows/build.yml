@@ -81,6 +81,7 @@ jobs:
           grep -q "^CONFIG_PACKAGE_block-mount=y$" .config || (echo "ERROR: block-mount missing!" && exit 1)
           grep -q "^CONFIG_PACKAGE_kmod-zram=y$" .config || (echo "ERROR: kmod-zram missing!" && exit 1)
           grep -q "^CONFIG_PACKAGE_zram-swap=y$" .config || (echo "ERROR: zram-swap missing!" && exit 1)
+          grep -q "^CONFIG_PACKAGE_luci-app-adblock-fast=y$" .config || (echo "ERROR: luci-app-adblock-fast missing!" && exit 1)
           echo "OK: all critical packages present"
 
       - name: Show target
@@ -102,15 +103,15 @@ jobs:
         working-directory: openwrt
         run: |
           echo "=== Checking for .bin files ==="
-          if [ ! "$(ls -A bin/targets/ramips/mt76x8/*.bin 2>/dev/null)" ]; then
+          if [ ! "$(ls -A bin/targets/ramips/mt7621/*.bin 2>/dev/null)" ]; then
             echo "ERROR: No .bin firmware files generated!"
-            ls -la bin/targets/ramips/mt76x8/ 2>/dev/null || true
+            ls -la bin/targets/ramips/mt7621/ 2>/dev/null || true
             exit 1
           fi
           echo "OK: Firmware images found"
 
       - name: Check image size
-        working-directory: openwrt/bin/targets/ramips/mt76x8
+        working-directory: openwrt/bin/targets/ramips/mt7621
         run: |
           echo "=== Image sizes ==="
           ls -lh *.bin
@@ -118,8 +119,11 @@ jobs:
             size=$(stat -c%s "$f")
             kb=$(($size/1024))
             echo "$f: ${kb}KB"
-            if [ "$size" -gt 7600000 ]; then
-              echo "WARNING: $f is over 7.6MB — close to 8MB flash limit!"
+            # R4A has 16MB flash (vs C50v6's 8MB) — TODO: confirm the real
+            # usable firmware partition size for this device before trusting
+            # this threshold, it's a rough estimate, not verified on hardware
+            if [ "$size" -gt 15200000 ]; then
+              echo "WARNING: $f is over ~14.5MB — check against real partition size!"
             fi
           done
 
@@ -128,7 +132,7 @@ jobs:
         run: |
           echo "=== Build FAILED — dumping debug info ==="
           echo "=== Kernel config tail ==="
-          KCONFIG=$(ls openwrt/target/linux/ramips/mt76x8/config-* 2>/dev/null | head -n 1)
+          KCONFIG=$(ls openwrt/target/linux/ramips/mt7621/config-* 2>/dev/null | head -n 1)
           if [ -n "$KCONFIG" ]; then
             echo "Found config: $KCONFIG"
             tail -30 "$KCONFIG"
@@ -150,7 +154,7 @@ jobs:
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: openwrt-c50v6-${{ github.run_number }}
+          name: openwrt-r4a-${{ github.run_number }}
           compression-level: 0
           if-no-files-found: error
           path: |

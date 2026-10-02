@@ -2,7 +2,7 @@
 set -e
 
 OPENWRT_DIR="openwrt"
-TARGET_DIR="$OPENWRT_DIR/target/linux/ramips/mt76x8"
+TARGET_DIR="$OPENWRT_DIR/target/linux/ramips/mt7621"
 
 echo "==> Patching kernel configs in: $TARGET_DIR"
 

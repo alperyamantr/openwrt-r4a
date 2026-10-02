@@ -5,7 +5,7 @@ USE_PROCD=1
 
 FLOWOFFLOAD="software"
 QUIC_MODE="desync"
-WAN_IF="eth0.2"
+WAN_IF="eth1"   # TODO: verify real WAN interface name on R4A via `ip a` after first boot (was eth0.2 on C50v6's switch-VLAN setup, R4A has separate WAN/LAN ports)
 LAN_IF="br-lan"
 QUEUE_PKTS=4
 NFQWS_BIN="/opt/zapret/nfqws"

@@ -2,7 +2,7 @@
 set -e
 
 echo "==> Copy profile"
-cp ../profiles/c50v6-minimal.config .config
+cp ../profiles/r4a-gigabit.config .config
 
 echo "==> Apply package list"
 while IFS= read -r pkg || [ -n "$pkg" ]; do
@@ -26,8 +26,8 @@ done < ../profiles/packages.txt
 
 # Cihaz profilinin ezilmemesi garantisi
 echo "CONFIG_TARGET_ramips=y" >> .config
-echo "CONFIG_TARGET_ramips_mt76x8=y" >> .config
-echo "CONFIG_TARGET_ramips_mt76x8_DEVICE_tplink_archer-c50-v6=y" >> .config
+echo "CONFIG_TARGET_ramips_mt7621=y" >> .config
+echo "CONFIG_TARGET_ramips_mt7621_DEVICE_xiaomi_mi-router-4a-gigabit=y" >> .config
 
 echo "==> Generate final config"
 make defconfig
