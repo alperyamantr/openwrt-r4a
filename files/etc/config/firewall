@@ -136,10 +136,4 @@ config redirect
 	option dest_port '53'
 	option target 'DNAT'
 
-config mangle
-	option name 'TTL-Fix'
-	option src 'lan'
-	option dest 'wan'
-	option target 'TTL'
-	option ttl '64'
 

@@ -35,7 +35,6 @@ luci-app-adblock-fast
 
 # --- ÇIKAR (Optimizasyon & Güvenlik) ---
 -ca-bundle
--uhttpd-mod-ubus
 -opkg
 -libopkg
 -procd-ujail

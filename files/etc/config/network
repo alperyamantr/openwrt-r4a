@@ -1,5 +1,4 @@
 
-
 config interface 'loopback'
 	option device 'lo'
 	option proto 'static'
@@ -18,7 +17,7 @@ config interface 'lan'
 	option metric '99'
 
 config interface 'wan'
-	option device 'eth1'
+	option device 'wan'
 	option proto 'dhcp'
 	option peerdns '0'
 	option ipv6 '0'
@@ -30,9 +29,6 @@ config interface 'wan'
 config device
 	option name 'br-lan'
 	option type 'bridge'
-	list ports 'eth0'
-	option ipv6 '0'
-
-config device
-	option name 'eth1'
+	list ports 'lan1'
+	list ports 'lan2'
 	option ipv6 '0'

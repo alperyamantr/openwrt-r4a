@@ -14,7 +14,7 @@
 chmod +x /opt/zapret/nfqws 2>/dev/null
 
 # Gercek WAN Arayuzu
-IFACE="eth1"          # R4A WAN: native eth1 port
+IFACE="wan"          # R4A DSA WAN port
 RATE="270000kbit"     # TODO: set to (line speed in Mbps * 900)kbit -- default=300Mbps
 VIP_RATE="300kbit"    # unchanged from C50v6 — still enough guaranteed BW for game/voice
 
