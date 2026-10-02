@@ -1,10 +1,6 @@
 # openwrt-r4a/profiles/packages.txt
-# R4A paket listesi - tek kaynak (single source of truth).
-# Felsefe: C50v6 ile ayni (opkg yok, USB/IPv6/tunnel moduller yok). tc-full (cake icin).
-# R4A farki: 128MB RAM -> adblock-fast + luci arayuzu mevcut.
-# Hagezi Light URL -> LuCI ile ilk boot sonrasi ayarla.
-
 # --- KORU ---
+luci
 luci-base
 luci-mod-admin-full
 luci-mod-network
@@ -33,16 +29,13 @@ iptables-mod-nfqueue
 libnetfilter-queue
 tc-full
 
-# --- EKLENEN: adblock-fast (hagezi_init/hagezi-guncelle yerine) ---
+# --- REKLAM ENGELLEME ---
 adblock-fast
 luci-app-adblock-fast
 
-# --- CIKAR (Optimizasyon & Guvenlik) ---
+# --- ÇIKAR (Optimizasyon & Güvenlik) ---
 -ca-bundle
 -uhttpd-mod-ubus
--luci-i18n-base-en
--luci-i18n-firewall-en
--luci-i18n-opkg-en
 -opkg
 -libopkg
 -procd-ujail
@@ -74,7 +67,7 @@ luci-app-adblock-fast
 -luci-theme-bootstrap
 -tc-tiny
 
-# --- PASIF / ZATEN CIKARILMIS ---
+# --- ZATEN ÇIKARILMIŞ / PASİF ---
 -luci-app-package-manager
 -luci-proto-ipv6
 -luci-proto-ppp
