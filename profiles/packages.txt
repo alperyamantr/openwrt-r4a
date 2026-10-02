@@ -1,14 +1,10 @@
 # openwrt-r4a/profiles/packages.txt
-# Ported from openwrt-c50v6's packages.txt almost unchanged — same RAM-conscious
-# philosophy (tc-tiny not tc-full/cake, opkg stripped, USB/ipv6/tunnel modules
-# stripped) even though R4A has 2x the RAM. Only real addition: luci-app-adblock-fast
-# (+ its adblock-fast dependency), which replaces C50v6's manual hagezi_init /
-# hagezi-guncelle / /tmp-symlink mechanism entirely — configure the Hagezi Light
-# list URL via LuCI after first boot (package's UCI schema changed recently
-# upstream, a shipped static config risks a uci parse error, safer to set via
-# the actual installed package's UI/defaults).
+# R4A paket listesi - tek kaynak (single source of truth).
+# Felsefe: C50v6 ile ayni (tc-tiny, opkg yok, USB/IPv6/tunnel moduller yok).
+# R4A farki: 128MB RAM -> adblock-fast + luci arayuzu mevcut.
+# Hagezi Light URL -> LuCI ile ilk boot sonrasi ayarla.
 
-# --- KORU (C50v6'dan birebir) ---
+# --- KORU ---
 luci-base
 luci-mod-admin-full
 luci-mod-network
@@ -26,6 +22,7 @@ htop
 kmod-nfnetlink-queue
 kmod-nft-queue
 kmod-sched
+kmod-sched-fq-codel
 zram-swap
 kmod-zram
 fstools
@@ -35,10 +32,11 @@ iptables-mod-nfqueue
 libnetfilter-queue
 tc-tiny
 
-# --- YENİ EKLENEN: adblock-fast (hagezi_init/hagezi-guncelle'nin yerine) ---
+# --- EKLENEN: adblock-fast (hagezi_init/hagezi-guncelle yerine) ---
+adblock-fast
 luci-app-adblock-fast
 
-# --- ÇIKAR (Optimizasyon & Güvenlik, C50v6'dan birebir) ---
+# --- CIKAR (Optimizasyon & Guvenlik) ---
 -ca-bundle
 -uhttpd-mod-ubus
 -luci-i18n-base-en
@@ -76,7 +74,7 @@ luci-app-adblock-fast
 -luci-theme-bootstrap
 -kmod-sched-cake
 
-# --- ZATEN ÇIKARILMIŞ / PASİF (C50v6'dan birebir) ---
+# --- PASIF / ZATEN CIKARILMIS ---
 -luci-app-package-manager
 -luci-proto-ipv6
 -luci-proto-ppp
