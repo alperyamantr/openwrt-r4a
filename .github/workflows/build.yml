@@ -121,8 +121,7 @@ jobs:
             size=$(stat -c%s "$f")
             kb=$(($size/1024))
             echo "$f: ${kb}KB"
-            # R4A has 16MB flash (vs C50v6's 8MB) — TODO: confirm the real
-            # usable firmware partition size for this device before trusting
+            # R4A 16MB SPI NOR Flash guvenli boyut kontrolu (14.5MB esik degeri)
             # this threshold, it's a rough estimate, not verified on hardware
             if [ "$size" -gt 15200000 ]; then
               echo "WARNING: $f is over ~14.5MB — check against real partition size!"

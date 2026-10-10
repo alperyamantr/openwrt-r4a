@@ -1,22 +1,13 @@
 #!/bin/sh
 # openwrt-r4a/files/etc/rc.local
-# Ported 1:1 from openwrt-c50v6's rc.local (HTB QoS structure/values kept
-# identical). Two things intentionally changed vs C50v6:
-#   - IFACE / rate: C50v6 was tuned for an 8Mbps line (eth0.2, 7200kbit).
-#     TODO: verify real WAN interface name via `ip a` after first boot, and
-#     set RATE below to your actual line speed (300Mbps here -> ~270000kbit,
-#     leave ~10% headroom off the nominal rate).
-#   - The old "HaGeZi Guncelleme" background block at the end was removed —
-#     that's now luci-app-adblock-fast's job (configure the Hagezi Light URL
-#     via LuCI after first boot; the package's rewritten 1.2.x core handles
-#     its own scheduling, don't reintroduce a manual wget loop for it).
+# Xiaomi Mi Router 4A Gigabit Edition (MT7621A) - HTB QoS & Traffic Shaping
 
 chmod +x /opt/zapret/nfqws 2>/dev/null
 
-# Gercek WAN Arayuzu
+# WAN Arayuzu
 IFACE="wan"          # R4A DSA WAN port
-RATE="270000kbit"     # TODO: set to (line speed in Mbps * 900)kbit -- default=300Mbps
-VIP_RATE="300kbit"    # unchanged from C50v6 — still enough guaranteed BW for game/voice
+RATE="7200kbit"      # 8 Mbps upload hattina gore %90 bufferbloat optimizasyonu
+VIP_RATE="300kbit"   # Oyun ve ses trafigi icin garantili bant
 
 # Alias Tanimlama (SSH'ta 'cs2' veya 'qos' yazip izlemek icin)
 if ! grep -q "alias qos=" /etc/profile; then
@@ -36,24 +27,44 @@ tc class add dev $IFACE parent 1: classid 1:1 htb rate $RATE ceil $RATE burst 64
 tc class add dev $IFACE parent 1:1 classid 1:10 htb rate $VIP_RATE ceil $RATE prio 0 quantum 1514 burst 3200b cburst 3200b
 tc qdisc add dev $IFACE parent 1:10 handle 10: fq_codel limit 1024 flows 128 quantum 300 target 5ms interval 40ms
 
-# 1:11 - GENEL EV TRAFIGI (prio 1)
+# 1:11 - GENEL TRAFIK (prio 1)
 tc class add dev $IFACE parent 1:1 classid 1:11 htb rate $RATE ceil $RATE prio 1 quantum 1514 burst 6400b cburst 6400b
-tc qdisc add dev $IFACE parent 1:11 handle 20: cake bandwidth $RATE
+tc qdisc add dev $IFACE parent 1:11 handle 20: cake bandwidth $RATE nat
 
-# --- VIP FILTRELERI (aynen tasindi) ---
+# VIP filtresi: UDP + dport
+vip() {
+    tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 \
+        match ip protocol 17 0xff match ip dport "$1" "$2" flowid 1:10
+}
 
-# 1. CS2 & Steam SDR (27000-27095)
-tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 match ip protocol 17 0xff match ip dport 27000 0xffe0 flowid 1:10
-tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 match ip protocol 17 0xff match ip dport 27032 0xffe0 flowid 1:10
-tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 match ip protocol 17 0xff match ip dport 27064 0xffe0 flowid 1:10
+# CS2 & Steam SDR: 26976-27103
+vip 0x6960 0xffe0
+vip 0x6980 0xffe0
+vip 0x69a0 0xffe0
+vip 0x69c0 0xffe0
 
-# 2. Voice & Relay (Steam Voice, Discord UDP, WhatsApp)
-tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 match ip protocol 17 0xff match ip dport 3478 0xffff flowid 1:10
-tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 match ip protocol 17 0xff match ip dport 4379 0xfffe flowid 1:10
+# Voice / relay: STUN 3478, 4379-4380
+vip 3478 0xffff
+vip 4379 0xffff
+vip 4380 0xffff
 
-# 3. Mobil Oyunlar (5000-5500, 8000-9000, 10000-20000)
-tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 match ip protocol 17 0xff match ip dport 5000 0xfe00 flowid 1:10
-tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 match ip protocol 17 0xff match ip dport 8000 0xfc00 flowid 1:10
-tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 match ip protocol 17 0xff match ip dport 10000 0xc000 flowid 1:10
+# Mobil oyunlar: 4992-5503
+vip 0x1380 0xff80
+vip 0x1400 0xff00
+vip 0x1500 0xff80
+
+# Mobil oyunlar: 8000-9215
+vip 0x1f40 0xffc0
+vip 0x1f80 0xff80
+vip 0x2000 0xfc00
+
+# Mobil oyunlar: 10000-20479
+vip 0x2710 0xfff0
+vip 0x2720 0xffe0
+vip 0x2740 0xffc0
+vip 0x2780 0xff80
+vip 0x2800 0xf800
+vip 0x3000 0xf000
+vip 0x4000 0xf000
 
 exit 0

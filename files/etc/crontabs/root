@@ -4,3 +4,5 @@
 41 4 */3 * * /opt/zapret/update-fake.sh >/dev/null 2>&1 
 # Her ayın 1'i 04:00 — USOM / banned listesi 
 0 4 1 * * /usr/bin/banned-guncelle
+# Her 3 dakikada bir - Bahis/kumar domain yakalama
+*/3 * * * * /usr/bin/gamcatch.sh

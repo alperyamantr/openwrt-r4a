@@ -9,8 +9,8 @@ logger -t banned "Banned list update started..."
 
 # Telemetry + statik blok (sabit)
 STATIC_PART='# ============================================================
-#  STATIK ENGELLEMELER (MANUEL) - C50 v6 Optimized
-#  AdGuard DNS + Hagezi Light ile çakýþmayanlar
+#  STATIK ENGELLEMELER (MANUEL) - R4A Gigabit Optimized
+#  AdGuard DNS + Hagezi Light ile ï¿½akï¿½ï¿½mayanlar
 # ============================================================
 
 # ===== WINDOWS / MICROSOFT TELEMETRY =====
@@ -166,14 +166,14 @@ address=/eksisozluk.com/0.0.0.0
 
 '
 
-# Mevcut dosyadan SITEEKLE kýsmýný al
+# Mevcut dosyadan SITEEKLE kï¿½smï¿½nï¿½ al
 SITEEKLE_PART=""
 if grep -Fq "# ==SITEEKLE-BASLANGIC==" "$BANNED_FILE" 2>/dev/null && \
    grep -Fq "# ==SITEEKLE-BITIS==" "$BANNED_FILE" 2>/dev/null; then
     SITEEKLE_PART=$(sed -n '/# ==SITEEKLE-BASLANGIC==/,/# ==SITEEKLE-BITIS==/p' "$BANNED_FILE" 2>/dev/null)
 fi
 
-# USOM API'den veri çek
+# USOM API'den veri ï¿½ek
 > "$TEMP_FILE"
 
 for page in $(seq 1 $USOM_PAGES); do
@@ -198,11 +198,11 @@ done
 # Benzersiz domainler
 UNIQUE_DOMAINS=$(sort -u "$TEMP_FILE" | grep -v '^$')
 
-# Dosyayý yaz
+# Dosyayï¿½ yaz
 {
     echo "$STATIC_PART"
     
-    # SITEEKLE kýsmý varsa ekle
+    # SITEEKLE kï¿½smï¿½ varsa ekle
     if [ -n "$SITEEKLE_PART" ]; then
         echo ""
         echo "$SITEEKLE_PART"
@@ -235,7 +235,7 @@ UNIQUE_DOMAINS=$(sort -u "$TEMP_FILE" | grep -v '^$')
     echo "# ==USOM-BITIS=="
 } > "${BANNED_FILE}.tmp"
 
-# Adet sayýsýný güncelle
+# Adet sayï¿½sï¿½nï¿½ gï¿½ncelle
 sed -i "s/#  Adet   : HESAPLANACAK/#  Adet   : $FINAL_COUNT/" "${BANNED_FILE}.tmp"
 
 mv "${BANNED_FILE}.tmp" "$BANNED_FILE"
@@ -244,4 +244,4 @@ rm -f "$TEMP_FILE"
 /etc/init.d/dnsmasq reload
 
 logger -t banned "Update completed. $FINAL_COUNT USOM domains added."
-echo "[+] banned.conf güncellendi. $FINAL_COUNT USOM domaini eklendi."
+echo "[+] banned.conf gï¿½ncellendi. $FINAL_COUNT USOM domaini eklendi."

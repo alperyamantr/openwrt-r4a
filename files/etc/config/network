@@ -6,8 +6,6 @@ config interface 'loopback'
 
 config globals 'globals'
 	option packet_steering '1'
-	option udp_conntrack_timeout '180'
-	option udp_conntrack_timeout_stream '180'
 
 config interface 'lan'
 	option device 'br-lan'
@@ -18,13 +16,16 @@ config interface 'lan'
 
 config interface 'wan'
 	option device 'wan'
-	option proto 'dhcp'
+	option proto 'static'
 	option peerdns '0'
 	option ipv6 '0'
 	option mtu '1500'
-	option metric '10'
 	list dns '94.140.14.14'
 	list dns '94.140.15.15'
+	option ipaddr '192.168.0.11'
+	option netmask '255.255.255.0'
+	option gateway '192.168.0.1'
+	option metric '10'
 
 config device
 	option name 'br-lan'
