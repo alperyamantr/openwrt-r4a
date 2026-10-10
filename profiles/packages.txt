@@ -8,7 +8,7 @@ luci-mod-admin-full
 luci-mod-network
 luci-mod-status
 luci-mod-system
-luci-theme-openwrt
+luci-theme-material
 uhttpd
 rpcd
 rpcd-mod-file
