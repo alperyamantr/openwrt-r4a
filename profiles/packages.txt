@@ -33,6 +33,10 @@ fstools
 libnetfilter-queue       # nfqws kullanici tarafi kutuphane
 tc-full
 
+# ==================== TRAFIK MONITORU ====================
+nlbwmon
+luci-app-nlbwmon
+
 # ==================== REKLAM ENGELLEME ====================
 adblock-fast
 luci-app-adblock-fast
@@ -45,6 +49,7 @@ coreutils-sort
 luci-i18n-base-tr
 luci-i18n-firewall-tr
 luci-i18n-adblock-fast-tr
+luci-i18n-nlbwmon-tr
 
 # ==================== CIKAR ====================
 # procd-ujail + procd-seccomp KALDI - 128MB'de ~1-2MB, dnsmasq sandbox'i degerli.
