@@ -38,3 +38,5 @@ profiles/packages.txt       text eol=lf
 
 # Zapret binary
 files/opt/zapret/nfqws      binary
+files/opt/zapret/ipset/*    text eol=lf
+files/opt/zapret/config      text eol=lf
