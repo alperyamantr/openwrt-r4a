@@ -1,4 +1,4 @@
-# Sosyal Medya & �leti�im
+# Sosyal Medya & Iletisim
 instagram.com
 cdninstagram.com
 facebook.com
@@ -17,7 +17,7 @@ discordapp.net
 reddit.com
 redditmedia.com
 
-# Video & Yay�n
+# Video & Yayin
 youtube.com
 youtu.be
 googlevideo.com

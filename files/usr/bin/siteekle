@@ -1,6 +1,6 @@
 #!/bin/sh
 if [ -z "$1" ]; then
-    echo "Kullan�m: siteekle domain.com"
+    echo "Kullanim: siteekle domain.com"
     exit 1
 fi
 
@@ -10,24 +10,24 @@ BANNED_FILE="/etc/dnsmasq.d/banned.conf"
 mkdir -p /etc/dnsmasq.d
 touch "$BANNED_FILE"
 
-# M�kerrer kontrol�
+# Mukerrer kontrolu
 if grep -Fq "address=/$DOMAIN/0.0.0.0" "$BANNED_FILE" 2>/dev/null; then
     echo "[-] $DOMAIN zaten engelli listesinde var bro!"
     exit 0
 fi
 
-# Marker yoksa olu�tur
+# Marker yoksa olustur
 if ! grep -Fq "# ==SITEEKLE-BITIS==" "$BANNED_FILE" 2>/dev/null; then
-    # USOM marker'dan �nce siteekle marker'� ekle
+    # USOM marker'dan once siteekle marker'i ekle
     if grep -Fq "# ==USOM-BASLANGIC==" "$BANNED_FILE" 2>/dev/null; then
         sed -i "/# ==USOM-BASLANGIC==/i # ==SITEEKLE-BASLANGIC==\n# ==SITEEKLE-BITIS==" "$BANNED_FILE"
     else
-        # Hi� marker yoksa dosya sonuna ekle
+        # Hic marker yoksa dosya sonuna ekle
         echo -e "# ==SITEEKLE-BASLANGIC==\n# ==SITEEKLE-BITIS==" >> "$BANNED_FILE"
     fi
 fi
 
-# Yeni domaini SITEEKLE-BITIS marker'dan �nce ekle
+# Yeni domaini SITEEKLE-BITIS marker'dan once ekle
 sed -i "/# ==SITEEKLE-BITIS==/i address=/$DOMAIN/0.0.0.0" "$BANNED_FILE"
 
 /etc/init.d/dnsmasq restart >/dev/null 2>&1
@@ -37,9 +37,9 @@ while ! nslookup localhost 127.0.0.1 >/dev/null 2>&1; do
     sleep 1
     TIMEOUT=$((TIMEOUT + 1))
     if [ $TIMEOUT -gt 15 ]; then
-        echo "[!] Dnsmasq ba�lat�l�rken zaman a��m� olu�tu."
+        echo "[!] Dnsmasq baslatilirken zaman asimi olustu."
         exit 1
     fi
 done
 
-echo "[+] $DOMAIN ba�ar�yla banned.conf dosyas�na eklendi."
+echo "[+] $DOMAIN basariyla banned.conf dosyasina eklendi."

@@ -24,19 +24,19 @@
 Zapret, nfqws ve nftables NFQUEUE kullanılarak MT7621 çift çekirdekli mimarisine özel multi-worker olarak çalışır.
 
 ### Yapılandırma (/etc/init.d/zapret):
-`sh
+```sh
 FLOWOFFLOAD="software"
 QUIC_MODE="block"
 WAN_IF="wan"
 LAN_IF="br-lan"
 QUEUE_PKTS=6
-`
+```
 
-- **Worker 1:** --qnum=80
-- **Worker 2:** --qnum=81
-- **Yük Dengeleme:** nftables queue flags bypass,fanout to 80-81
+- **Worker 1:** `--qnum=80`
+- **Worker 2:** `--qnum=81`
+- **Yük Dengeleme:** `nftables queue flags bypass,fanout to 80-81`
 - **QUIC Koruması:** UDP 443 nftables seviyesinde reddedilerek tarayıcılar TCP 443 TLS 1.3'e zorlanır.
-- **Kalıcılık:** /etc/hotplug.d/firewall/99-zapret tetikleyicisi devrededir.
+- **Kalıcılık:** `/etc/hotplug.d/firewall/99-zapret` tetikleyicisi devrededir.
 
 ---
 
@@ -45,7 +45,7 @@ QUEUE_PKTS=6
 HTB + fq_codel + cake tabanlı önceliklendirme ile rekabetçi oyunlarda bufferbloat engellenir.
 
 - **WAN:** wan
-- **Hız Limiti:** RATE="7200kbit" (8 Mbps upload hattına göre optimize)
+- **Hız Limiti:** `RATE="7200kbit"` (8 Mbps upload hattına göre optimize)
 - **VIP Sınıfı (1:10):** CS2 (26976-27103), Discord (3478, 4379-4380) ve mobil oyunlar için garantili 300kbit taban bant ve 5ms hedef gecikme.
 - **Genel Sınıf (1:11):** cake qdisc.
 
@@ -55,5 +55,5 @@ HTB + fq_codel + cake tabanlı önceliklendirme ile rekabetçi oyunlarda bufferb
 
 1. **AdGuard DoH:** DNS-over-HTTPS (https-dns-proxy) ile şifreli DNS sorguları (127.0.0.1#5053, #5054).
 2. **AdBlock-Fast:** HaGeZi Pro listesi + OEM (Xiaomi, Oppo, Huawei) telemetri filtreleri.
-3. **Gamcatch:** /usr/bin/gamcatch.sh ile her 3 dakikada bir dnsmasq sorgularından kumar/bahis sitelerini yakalayıp engelleyen otomatik motor.
-4. **Statik Tehdit:** USOM ve bilinen zararlı listesi (/etc/dnsmasq.d/banned.conf).
+3. **Gamcatch:** `/usr/bin/gamcatch.sh` ile her 3 dakikada bir dnsmasq sorgularından kumar/bahis sitelerini yakalayıp engelleyen otomatik motor.
+4. **Statik Tehdit:** USOM ve bilinen zararlı listesi (`/etc/dnsmasq.d/banned.conf`).
