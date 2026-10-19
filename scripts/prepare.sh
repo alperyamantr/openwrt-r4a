@@ -35,6 +35,7 @@ done < ../profiles/packages.txt
 echo "CONFIG_TARGET_ramips=y" >> .config
 echo "CONFIG_TARGET_ramips_mt7621=y" >> .config
 echo "CONFIG_TARGET_ramips_mt7621_DEVICE_xiaomi_mi-router-4a-gigabit=y" >> .config
+echo "CONFIG_LUCI_LANG_tr=y" >> .config
 
 echo "==> Generate final config"
 make defconfig

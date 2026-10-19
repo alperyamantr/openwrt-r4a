@@ -1,11 +1,6 @@
+
 config adblock-fast 'config'
 	option enabled '1'
-	list allowed_domain 'cdn.jsdelivr.net'
-	list allowed_domain 'streamtape.com'
-	list allowed_domain 'streamtape.cc'
-	list allowed_domain 'streamtape.net'
-	list allowed_domain 'data.streamtape.com'
-	list allowed_domain 'video.streamtape.com'
 	option allow_non_ascii '0'
 	option canary_domains_icloud '0'
 	option canary_domains_mozilla '0'
@@ -35,120 +30,141 @@ config adblock-fast 'config'
 	option dnsmasq_sanity_check '1'
 	option config_compat '17'
 	option config_version '1.2.4-r2'
+	option rpcd_token 'c5eCdbDB9wEBQFehcSbr5Z5L'
 	option dnsmasq_validity_check '0'
 	option debug '0'
 
 config file_url
 	option name 'Hagezi - Pro'
 	option url 'https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro-onlydomains.txt'
+	option size '3832811'
 	option action 'block'
 
 config file_url
 	option name 'AdguardTeam - CNAME Trackers'
 	option url 'https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_trackers_justdomains.txt'
+	option size '6241707'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'OISD - Big'
 	option url 'https://big.oisd.nl/'
+	option size '6163363'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'StevenBlack - Unified hosts'
 	option url 'https://cdn.jsdelivr.net/gh/StevenBlack/hosts/hosts'
+	option size '4790642'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name '1Hosts - Lite'
 	option url 'https://o0.pages.dev/Lite/domains.txt'
+	option size '2786010'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'Bongochong - Combined Privacy Block Lists (TLD Optimized)'
 	option url 'https://cdn.jsdelivr.net/gh/bongochong/CombinedPrivacyBlockLists/NoFormatting/cpbl-ctld.txt'
+	option size '2608152'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'CERT Polska - Dangerous Websites'
 	option url 'https://hole.cert.pl/domains/v2/domains.txt'
+	option size '731479'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'Kboghdady - YouTube Ads DNS'
 	option url 'https://cdn.jsdelivr.net/gh/kboghdady/youTube_ads_4_pi-hole/black.list'
+	option size '522204'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'AdguardTeam - CNAME Clickthroughs'
 	option url 'https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_clickthroughs_justdomains.txt'
+	option size '362170'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'SomeoneWhoCares - Hosts'
 	option url 'https://someonewhocares.org/hosts/hosts'
+	option size '347410'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'WinHelp2002 MVPS - Hosts'
 	option url 'https://winhelp2002.mvps.org/hosts.txt'
+	option size '334861'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'AdAway - Hosts'
 	option url 'https://adaway.org/hosts.txt'
+	option size '243454'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'AdguardTeam - CNAME Ads'
 	option url 'https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_ads_justdomains.txt'
+	option size '222595'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'AdguardTeam - CNAME Microsites'
 	option url 'https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_microsites_justdomains.txt'
+	option size '123275'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'Yoyo.org - Hosts'
 	option url 'https://pgl.yoyo.org/as/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext'
+	option size '99588'
 	option action 'block'
 	option enabled '0'
 
 config file_url
 	option name 'Hoshsadiq - NoCoin Adblock List'
 	option url 'https://cdn.jsdelivr.net/gh/hoshsadiq/adblock-nocoin-list/hosts.txt'
+	option size '11149'
 	option action 'block'
 	option enabled '0'
 
 config file_url
+	option action 'block'
 	option name 'Oppo / Realme / OnePlus'
 	option url 'https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/dnsmasq/native.oppo-realme.txt'
-	option action 'block'
+	option size '19150'
 
 config file_url
+	option action 'block'
 	option name 'Xiaomi / Poco / Redmi'
 	option url 'https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/dnsmasq/native.xiaomi.txt'
-	option action 'block'
+	option size '12096'
 
 config file_url
+	option action 'block'
 	option name 'Huawei / Honor'
 	option url 'https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/dnsmasq/native.huawei.txt'
-	option action 'block'
+	option size '6869'
 
 config file_url
-	option name 'Hagezi TikTok Native'
 	option url 'https://raw.githubusercontent.com/hagezi/dns-blocklists/refs/heads/main/dnsmasq/native.tiktok.txt'
-	option action 'block'
+	option name 'Hagezi TikTok Native'
+	option size '16800'
+
