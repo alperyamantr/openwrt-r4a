@@ -3,97 +3,55 @@ START=99
 STOP=10
 USE_PROCD=1
 
-# ============================================================
-# KULLANICI AYARLARI (Mi 4A Gigabit - MT7621A Dual-Core)
-# ============================================================
-FLOWOFFLOAD="software"          # software | none | hardware
-QUIC_MODE="block"               # block (Onerilen: 0 gecikme) | desync (Fake QUIC)
-WAN_IF="wan"                    # Fiziksel DSA WAN portu
-LAN_IF="br-lan"                 # Yerel ag koprusu
-QUEUE_PKTS=6                    # Ilk 6 paket NFQUEUE'ya, sonrasi Flow Offload
+FLOWOFFLOAD="software"
+QUIC_MODE="block"
+WAN_IF="wan"
+LAN_IF="br-lan"
+QUEUE_PKTS=6
 NFQWS_BIN="/opt/zapret/nfqws"
 FAKE_DIR="/opt/zapret/files/fake"
 
 start_service() {
-    stop_service > /dev/null 2>&1
     modprobe -q nfnetlink_queue 2>/dev/null
 
-    # Kernel tuning - Mi 4A (128MB RAM / Dual-Core 880MHz)
     sysctl -w net.netfilter.nf_conntrack_max=16384 >/dev/null 2>&1 || true
-    sysctl -w net.netfilter.nfnetlink_queue_maxlen=4096 >/dev/null 2>&1 || true
+    sysctl -w net.netfilter.nfnetlink_queue_maxlen=2048 >/dev/null 2>&1 || true
     sysctl -w net.core.netdev_max_backlog=2048 >/dev/null 2>&1 || true
-    sysctl -w net.netfilter.nf_conntrack_udp_timeout_stream=60 >/dev/null 2>&1 || true
+    sysctl -w net.netfilter.nf_conntrack_udp_timeout_stream=45 >/dev/null 2>&1 || true
 
-    # Fake dosyalari dizin kontrolu (Alternatif /etc/zapret/fake destegi ile)
-    if [ ! -d "$FAKE_DIR" ] && [ -d "/etc/zapret/fake" ]; then
-        FAKE_DIR="/etc/zapret/fake"
-    fi
-    [ -d "$FAKE_DIR" ] || mkdir -p "$FAKE_DIR" 2>/dev/null || true
-
-    # Fake dosyalari varlik ve boyut kontrolu (Bozuk/bos dosya durumunda nfqws cokmesini engeller)
-    local FAKE_TLS=""
-    local FAKE_DISCORD=""
-    local FAKE_STUN=""
-    local FAKE_QUIC=""
-
-    [ -s "$FAKE_DIR/tls_clienthello_www_google_com.bin" ] && \
-        FAKE_TLS="--dpi-desync-fake-tls=$FAKE_DIR/tls_clienthello_www_google_com.bin"
-
-    [ -s "$FAKE_DIR/discord-ip-discovery-with-port.bin" ] && \
-        FAKE_DISCORD="--dpi-desync-fake-unknown-udp=$FAKE_DIR/discord-ip-discovery-with-port.bin"
-
-    [ -s "$FAKE_DIR/stun.bin" ] && \
-        FAKE_STUN="--dpi-desync-fake-unknown-udp=$FAKE_DIR/stun.bin"
-
-    [ -s "$FAKE_DIR/quic_initial_www_google_com.bin" ] && \
-        FAKE_QUIC="--dpi-desync-fake-quic=$FAKE_DIR/quic_initial_www_google_com.bin"
-
-    # Ortak Desync Argumanlari (Fake dosyalari tam entegreli)
-    local COMMON_ARGS="--user=daemon --bind-fix4 \
+    # Ortak Argümanlar
+    COMMON_ARGS="--user=daemon --bind-fix4 \
         --filter-tcp=443 \
         --dpi-desync=fake,split \
         --dpi-desync-split-pos=1 \
         --dpi-desync-ttl=3 \
-        --dpi-desync-repeats=2 \
+        --dpi-desync-repeats=1 \
         --dpi-desync-fooling=badsum \
-        $FAKE_TLS \
+        --dpi-desync-fake-tls=$FAKE_DIR/tls_clienthello_www_google_com.bin \
         --dpi-desync-cutoff=d3 \
         --new \
         --filter-tcp=80 \
         --dpi-desync=fake,split \
         --dpi-desync-split-pos=method+2 \
         --dpi-desync-ttl=4 \
-        --dpi-desync-repeats=2 \
+        --dpi-desync-repeats=1 \
         --dpi-desync-fooling=badsum \
         --new \
         --filter-udp=19294-19344,50000-60000 \
         --dpi-desync=fake \
         --dpi-desync-ttl=4 \
-        --dpi-desync-repeats=2 \
+        --dpi-desync-repeats=1 \
         --dpi-desync-any-protocol \
         --dpi-desync-cutoff=n2 \
-        $FAKE_DISCORD \
+        --dpi-desync-fake-unknown-udp=$FAKE_DIR/discord-ip-discovery-with-port.bin \
         --new \
-        --filter-udp=3478-3480,4379-4380 \
+        --filter-udp=3478,3479,3480 \
         --dpi-desync=fake \
         --dpi-desync-ttl=4 \
-        --dpi-desync-repeats=2 \
+        --dpi-desync-repeats=1 \
         --dpi-desync-any-protocol \
         --dpi-desync-cutoff=n2 \
-        $FAKE_STUN"
-
-    # QUIC desync secildiyse fake-quic ekle
-    if [ "$QUIC_MODE" = "desync" ]; then
-        COMMON_ARGS="$COMMON_ARGS \
-            --new \
-            --filter-udp=443 \
-            --dpi-desync=fake \
-            --dpi-desync-ttl=3 \
-            --dpi-desync-repeats=2 \
-            --dpi-desync-any-protocol \
-            --dpi-desync-cutoff=n2 \
-            $FAKE_QUIC"
-    fi
+        --dpi-desync-fake-unknown-udp=$FAKE_DIR/stun.bin"
 
     # Worker 1 (Core 1) -> QNUM 80
     procd_open_instance zapret1
@@ -109,61 +67,48 @@ start_service() {
     procd_set_param oom_score_adj -500
     procd_close_instance
 
-    # nftables tablosu olustur
+    # nftables Kurulumu
     nft delete table inet zapret 2>/dev/null || true
     nft add table inet zapret 2>/dev/null || true
     nft add chain inet zapret forward '{ type filter hook forward priority -150; policy accept; }' 2>/dev/null || true
 
-    # Discord & Voice / WebRTC UDP Port Seti
     nft add set inet zapret udp_ports '{ type inet_service; flags interval; }' 2>/dev/null || true
-    nft add element inet zapret udp_ports '{ 19294-19344, 50000-60000, 3478-3480, 4379-4380 }' 2>/dev/null || true
+    nft add element inet zapret udp_ports '{ 19294-19344, 50000-60000, 3478-3480 }' 2>/dev/null || true
 
-    # Bypass listesi (CRLF ve bosluk temizlemeli)
     local BYPASS_IPS="/etc/zapret-bypass-ips.txt"
     if [ -f "$BYPASS_IPS" ]; then
         while IFS= read -r ip; do
-            ip="$(printf '%s' "$ip" | tr -d '\r' | tr -d ' ')"
             case "$ip" in
                 ""|\#*) continue ;;
                 *:*) nft add rule inet zapret forward ip6 daddr "$ip" accept 2>/dev/null ;;
-                *)   nft add rule inet zapret forward ip daddr "$ip" accept 2>/dev/null ;;
+                *) nft add rule inet zapret forward ip daddr "$ip" accept 2>/dev/null ;;
             esac
         done < "$BYPASS_IPS"
     fi
 
-    # QUIC engelleme (Port-Unreachable ile istemciyi aninda TCP 443'e yonlendirir)
+    # QUIC Engelleme
     if [ "$QUIC_MODE" = "block" ]; then
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 reject with icmp type port-unreachable 2>/dev/null || \
         nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 reject 2>/dev/null || true
     fi
 
-    # Queue kurallari (80-81 arasi fanout ile donanimsal cift cekirdek yuk dagitimi)
+    # Çift Kuyruk Fanout (80-81) - Yükü 2 çekirdeğe böler
     nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 443 ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null
     nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 80 ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null
     nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport @udp_ports ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null
 
-    if [ "$QUIC_MODE" = "desync" ]; then
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null
-    fi
-
-    # Software Flow Offload (Donanim seviyesinde gigabit yonlendirme)
+    # Flow Offload
     if [ "$FLOWOFFLOAD" = "software" ]; then
         nft add flowtable inet zapret ft "{ hook ingress priority 0; devices = { $LAN_IF, $WAN_IF }; }" 2>/dev/null || true
         nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 443 ct original packets ">$QUEUE_PKTS" flow add @ft 2>/dev/null
         nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 80 ct original packets ">$QUEUE_PKTS" flow add @ft 2>/dev/null
         nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport @udp_ports ct original packets ">$QUEUE_PKTS" flow add @ft 2>/dev/null
-        if [ "$QUIC_MODE" = "desync" ]; then
-            nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 ct original packets ">$QUEUE_PKTS" flow add @ft 2>/dev/null
-        fi
     fi
 }
 
 stop_service() {
-    killall -q -9 nfqws 2>/dev/null
     nft delete table inet zapret 2>/dev/null || true
 }
 
 service_triggers() {
     procd_add_reload_trigger "zapret"
-    procd_add_reload_interface_trigger "$WAN_IF"
 }
