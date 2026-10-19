@@ -16,23 +16,30 @@ rpcd-mod-file
 rpcd-mod-rpcsys
 firewall4
 dnsmasq-full
-ca-certificates          # ca-bundle ile CAKISIR (apk), ikisinden biri yeter
+# ca-bundle ile cakismamasi icin ca-certificates
+ca-certificates
 htop
-tcpdump-mini             # zapret/DPI debug
-openssh-sftp-server      # WinSCP dosya edit
-cron                     # adblock-fast otomatik guncelleme + gamcatch ZORUNLU (varsayilan imajda yok)
-kmod-nfnetlink-queue     # zapret nfqws
-kmod-nft-queue           # nft "queue to 80"
+# zapret/DPI debug
+tcpdump-mini
+# WinSCP dosya edit
+openssh-sftp-server
+# adblock-fast otomatik guncelleme + gamcatch ZORUNLU
+cron
+kmod-nfnetlink-queue
+kmod-nft-queue
 kmod-sched
 kmod-sched-fq-codel
 kmod-sched-cake
-kmod-sched-ctinfo        # DSCP koruma (VIP sinifi)
-kmod-ifb                 # ileride ingress shaping (su an pasif)
+# DSCP koruma (VIP sinifi)
+kmod-sched-ctinfo
+# ileride ingress shaping (su an pasif)
+kmod-ifb
 zram-swap
 kmod-zram
 fstools
 block-mount
-libnetfilter-queue       # nfqws kullanici tarafi kutuphane
+# nfqws kullanici tarafi kutuphane
+libnetfilter-queue
 tc-full
 
 # ==================== TRAFIK MONITORU ====================
@@ -65,11 +72,10 @@ luci-i18n-https-dns-proxy-tr
 #  -rpcd-mod-rrdns                   -> luci-base bagimliligi
 #  -opkg / -libopkg                  -> apk caginda bu isimde paket yok (no-op)
 
-# !!! TEMA ZINCIRI: luci -> luci-light -> luci-theme-bootstrap
-# ucunu birden cikarmazsan bootstrap imaja geri gelir (v5 dersti):
--luci                    # metapaket (LuCI uygulamari yukarida tek tek KORU'da)
--luci-light              # metapaket
--luci-theme-bootstrap    # ancak zincir kirilinca silinebilir
+# TEMA ZINCIRI: luci -> luci-light -> luci-theme-bootstrap
+-luci
+-luci-light
+-luci-theme-bootstrap
 
 -ca-bundle
 -odhcp6c
@@ -98,7 +104,7 @@ luci-i18n-https-dns-proxy-tr
 -kmod-crypto-hw-eip93
 -tc-tiny
 
-# !!! UYARI: TT VDSL/PPPoE gecersen geri ekle: ppp ppp-mod-pppoe kmod-ppp kmod-pppoe kmod-pppox
+# TT VDSL/PPPoE gecilirse geri ekle: ppp ppp-mod-pppoe kmod-ppp kmod-pppoe kmod-pppox
 
 # ==================== PASIF ====================
 -luci-app-package-manager

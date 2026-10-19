@@ -5,10 +5,17 @@ echo "==> Copy profile"
 cp ../profiles/r4a-gigabit.config .config
 
 echo "==> Apply package list"
-while IFS= read -r pkg || [ -n "$pkg" ]; do
-    pkg="${pkg%$'\r'}"
+while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"
+    # Satir ici ve tam satir yorumlari temizle (# ve sonrasi)
+    pkg="${line%%#*}"
+    # Bas ve sondaki bosluklari temizle
+    pkg="$(echo "$pkg" | xargs)"
+    
+    # Bos satir ise atla
+    [ -z "$pkg" ] && continue
+
     case "$pkg" in
-        ""|\#*) continue ;;
         -*)
             name="${pkg#-}"
             sed -i "/^CONFIG_PACKAGE_${name}=y$/d" .config
