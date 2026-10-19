@@ -6,3 +6,5 @@
 0 4 1 * * /usr/bin/banned-guncelle
 # Her 3 dakikada bir - Bahis/kumar domain yakalama
 */3 * * * * /usr/bin/gamcatch.sh
+# Her 30 dakikada bir — Adblock-fast calisma kontrolu
+*/30 * * * * /etc/init.d/adblock-fast status >/dev/null 2>&1 || /etc/init.d/adblock-fast restart

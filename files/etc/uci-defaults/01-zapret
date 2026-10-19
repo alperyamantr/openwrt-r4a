@@ -1,16 +1,17 @@
 #!/bin/sh
 # /etc/uci-defaults/01-zapret
 
-# Zapret init dosyasına izin ver
+# Zapret init dosyasina izin ver
 chmod +x /etc/init.d/zapret 2>/dev/null || true
 
-# Zapret'i enable et (boot'ta çalışsın)
+# Zapret'i enable et (boot'ta calissin)
 /etc/init.d/zapret enable 2>/dev/null || true
 
-# Gerekli dizinleri oluştur
-mkdir -p /opt/zapret/files/fake
+# Gerekli dizinleri olustur
+mkdir -p /opt/zapret/files/fake 2>/dev/null || true
 
-# nfqws binary'e izin ver
+# Binary ve script izinleri
 chmod +x /opt/zapret/nfqws 2>/dev/null || true
+chmod +x /opt/zapret/update-fake.sh 2>/dev/null || true
 
 exit 0

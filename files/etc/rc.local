@@ -67,4 +67,5 @@ vip 0x2800 0xf800
 vip 0x3000 0xf000
 vip 0x4000 0xf000
 
+(sleep 20 && /etc/init.d/adblock-fast status | grep -q "running" || /etc/init.d/adblock-fast restart) &
 exit 0

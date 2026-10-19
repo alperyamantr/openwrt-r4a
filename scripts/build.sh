@@ -8,7 +8,7 @@ SCRIPTS_DIR="../scripts"
 echo "==> Step 1: Update feeds"
 if [ ! -d "$OPENWRT_DIR" ]; then
     echo "ERROR: $OPENWRT_DIR directory not found!"
-    echo "Run: git clone --depth=1 --branch v25.12.5 https://github.com/openwrt/openwrt.git"
+    echo "Run: git clone --depth=1 --branch v25.12.6 https://github.com/openwrt/openwrt.git"
     exit 1
 fi
 

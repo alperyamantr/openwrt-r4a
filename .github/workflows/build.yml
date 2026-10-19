@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  OPENWRT_VERSION: v25.12.5
+  OPENWRT_VERSION: v25.12.6
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
@@ -83,7 +83,7 @@ jobs:
           grep -q "^CONFIG_PACKAGE_zram-swap=y$" .config || (echo "ERROR: zram-swap missing!" && exit 1)
           grep -q "^CONFIG_PACKAGE_luci-app-adblock-fast=y$" .config || (echo "ERROR: luci-app-adblock-fast missing!" && exit 1)
           grep -q "^CONFIG_PACKAGE_uhttpd-mod-ubus=y$" .config || (echo "ERROR: uhttpd-mod-ubus missing!" && exit 1)
-          grep -q "^CONFIG_PACKAGE_luci-theme-openwrt=y$" .config || (echo "ERROR: LuCI theme missing!" && exit 1)
+          grep -qE "^CONFIG_PACKAGE_luci-theme-(material|openwrt)=y$" .config || (echo "ERROR: LuCI theme missing!" && exit 1)
           echo "OK: all critical packages present"
 
       - name: Show target

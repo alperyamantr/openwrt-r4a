@@ -6,7 +6,7 @@ Xiaomi Mi Router 4A Gigabit Edition (Model: R4A) için yüksek performanslı, d�
 - **SoC:** MediaTek MT7621A (Dual-Core 880MHz, 4 Donanımsal VPE Thread)
 - **RAM:** 128MB DDR3
 - **Flash:** 16MB SPI NOR
-- **Target:** amips/mt7621 (OpenWrt v25.12 Snapshot)
+- **Target:** ramips/mt7621 (OpenWrt v25.12.6)
 - **Ağ Arayüzü:** 1x Gigabit WAN (DSA wan), 2x Gigabit LAN (lan1, lan2)
 - **Kablosuz Ağ:** Dual-Band Wi-Fi (2.4GHz b/g/n + 5GHz a/n/ac)
 
@@ -20,10 +20,10 @@ Xiaomi Mi Router 4A Gigabit Edition (Model: R4A) için yüksek performanslı, d�
    - HTB + fq_codel + cake tabanlı bufferbloat engelleme mimarisi.
    - CS2, Steam SDR, Discord ve mobil oyun portları için garantili 1:10 VIP kanalı.
 3. **Reklam, Telemetri & Tehdit Koruması:**
-   - Entegre dblock-fast ve HaGeZi Pro filtreleme motoru.
+   - Entegre adblock-fast ve HaGeZi Pro filtreleme motoru.
    - Xiaomi, Oppo, Huawei/Honor cihaz telemetrisi engelleme listeleri.
    - gamcatch ile gerçek zamanlı kumar/bahis domain yakalama ve engelleme betiği.
-   - USOM tehdit filtreleme altyapısı (anned.conf).
+   - USOM tehdit filtreleme altyapısı (banned.conf).
 4. **Çekirdek & Sistem:**
    - TCP Westwood tıkanıklık kontrol algoritması.
    - Packet Steering (RPS/RFS) ile ağ kesmelerinin 4 iş parçacığına dengeli dağıtımı.

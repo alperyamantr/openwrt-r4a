@@ -9,7 +9,7 @@
 | Parametre    | Değer                                       |
 | ------------ | -------------------------------------------- |
 | Model        | Xiaomi Mi Router 4A Gigabit (R4A)            |
-| Target       | ramips/mt7621                                |
+| Target       | ramips/mt7621 (v25.12.6)                     |
 | CPU          | MediaTek MT7621A, Dual-Core 880 MHz (4 VPE)  |
 | RAM          | 128 MB DDR3                                  |
 | Flash        | 16 MB SPI NOR                                |
@@ -21,8 +21,7 @@
 
 ## Zapret DPI Bypass (Dual-Core)
 
-Zapret, 
-fqws ve nftables NFQUEUE kullanılarak MT7621 çift çekirdekli mimarisine özel multi-worker olarak çalışır.
+Zapret, nfqws ve nftables NFQUEUE kullanılarak MT7621 çift çekirdekli mimarisine özel multi-worker olarak çalışır.
 
 ### Yapılandırma (/etc/init.d/zapret):
 `sh
@@ -54,6 +53,7 @@ HTB + fq_codel + cake tabanlı önceliklendirme ile rekabetçi oyunlarda bufferb
 
 ## Reklam ve Güvenlik Filtreleme
 
-1. **AdBlock-Fast:** HaGeZi Pro listesi + OEM (Xiaomi, Oppo, Huawei) telemetri filtreleri.
-2. **Gamcatch:** /usr/bin/gamcatch.sh ile her 3 dakikada bir dnsmasq sorgularından kumar/bahis sitelerini yakalayıp engelleyen otomatik motor.
-3. **Statik Tehdit:** USOM ve bilinen zararlı listesi (/etc/dnsmasq.d/banned.conf).
+1. **AdGuard DoH:** DNS-over-HTTPS (https-dns-proxy) ile şifreli DNS sorguları (127.0.0.1#5053, #5054).
+2. **AdBlock-Fast:** HaGeZi Pro listesi + OEM (Xiaomi, Oppo, Huawei) telemetri filtreleri.
+3. **Gamcatch:** /usr/bin/gamcatch.sh ile her 3 dakikada bir dnsmasq sorgularından kumar/bahis sitelerini yakalayıp engelleyen otomatik motor.
+4. **Statik Tehdit:** USOM ve bilinen zararlı listesi (/etc/dnsmasq.d/banned.conf).

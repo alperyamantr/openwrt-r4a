@@ -1,5 +1,4 @@
-# exclude listttmobil.com.tr
-turktelekom.com.tr
+# TTNet / TT Mobil exclude listesi
 turktelekom.com.tr
 ttmobil.com.tr
 netmera.com

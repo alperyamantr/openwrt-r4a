@@ -10,6 +10,7 @@ luci-mod-status
 luci-mod-system
 luci-theme-material
 uhttpd
+uhttpd-mod-ubus
 rpcd
 rpcd-mod-file
 rpcd-mod-rpcsys
@@ -30,6 +31,7 @@ kmod-ifb                 # ileride ingress shaping (su an pasif)
 zram-swap
 kmod-zram
 fstools
+block-mount
 libnetfilter-queue       # nfqws kullanici tarafi kutuphane
 tc-full
 
@@ -45,11 +47,16 @@ grep
 sed
 coreutils-sort
 
+# ==================== SIFRELI DOH PROXY ====================
+https-dns-proxy
+luci-app-https-dns-proxy
+
 # ==================== DIL ====================
 luci-i18n-base-tr
 luci-i18n-firewall-tr
 luci-i18n-adblock-fast-tr
 luci-i18n-nlbwmon-tr
+luci-i18n-https-dns-proxy-tr
 
 # ==================== CIKAR ====================
 # procd-ujail + procd-seccomp KALDI - 128MB'de ~1-2MB, dnsmasq sandbox'i degerli.
