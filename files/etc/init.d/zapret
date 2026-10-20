@@ -44,25 +44,23 @@ start_service() {
 
     local COMMON_ARGS="--user=daemon --bind-fix4 \
         --filter-tcp=443 \
-        --dpi-desync=fake,split \
-        --dpi-desync-split-pos=1 \
+        --dpi-desync=fake \
         --dpi-desync-ttl=3 \
-        --dpi-desync-repeats=2 \
+        --dpi-desync-repeats=1 \
         --dpi-desync-fooling=badsum \
         $FAKE_TLS \
         --dpi-desync-cutoff=d3 \
         --new \
         --filter-tcp=80 \
-        --dpi-desync=fake,split \
-        --dpi-desync-split-pos=method+2 \
+        --dpi-desync=fake \
         --dpi-desync-ttl=4 \
-        --dpi-desync-repeats=2 \
+        --dpi-desync-repeats=1 \
         --dpi-desync-fooling=badsum \
         --new \
         --filter-udp=19294-19344,50000-60000 \
         --dpi-desync=fake \
         --dpi-desync-ttl=4 \
-        --dpi-desync-repeats=2 \
+        --dpi-desync-repeats=1 \
         --dpi-desync-any-protocol \
         --dpi-desync-cutoff=n2 \
         $FAKE_DISCORD \
@@ -70,7 +68,7 @@ start_service() {
         --filter-udp=3478-3480,4379-4380 \
         --dpi-desync=fake \
         --dpi-desync-ttl=4 \
-        --dpi-desync-repeats=2 \
+        --dpi-desync-repeats=1 \
         --dpi-desync-any-protocol \
         --dpi-desync-cutoff=n2 \
         $FAKE_STUN"
@@ -81,7 +79,7 @@ start_service() {
             --filter-udp=443 \
             --dpi-desync=fake \
             --dpi-desync-ttl=3 \
-            --dpi-desync-repeats=2 \
+            --dpi-desync-repeats=1 \
             --dpi-desync-any-protocol \
             --dpi-desync-cutoff=n2 \
             $FAKE_QUIC"
@@ -119,8 +117,8 @@ start_service() {
     fi
 
     if [ "$QUIC_MODE" = "block" ]; then
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 reject with icmp type port-unreachable 2>/dev/null || \
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 reject 2>/dev/null || true
+        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport { 80, 443 } reject with icmp type port-unreachable 2>/dev/null || \
+        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport { 80, 443 } reject 2>/dev/null || true
     fi
 
     nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 443 ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null
