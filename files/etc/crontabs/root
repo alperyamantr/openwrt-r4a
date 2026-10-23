@@ -7,4 +7,5 @@
 # Her 3 dakikada bir - Bahis/kumar domain yakalama
 */3 * * * * /usr/bin/gamcatch.sh
 # Her 30 dakikada bir - Adblock-fast calisma kontrolu
-*/30 * * * * /etc/init.d/adblock-fast status >/dev/null 2>&1 || /etc/init.d/adblock-fast restart
+*/30 * * * * /etc/init.d/adblock-fast status 2>&1 | grep -q "is blocking" || /etc/init.d/adblock-fast restart
+

@@ -12,11 +12,10 @@ NFQWS_BIN="/opt/zapret/nfqws"
 FAKE_DIR="/opt/zapret/files/fake"
 
 start_service() {
-    stop_service > /dev/null 2>&1
     modprobe -q nfnetlink_queue 2>/dev/null
 
+    sysctl -w net.netfilter.nf_conntrack_acct=1 >/dev/null 2>&1 || true
     sysctl -w net.netfilter.nf_conntrack_max=16384 >/dev/null 2>&1 || true
-    sysctl -w net.netfilter.nfnetlink_queue_maxlen=4096 >/dev/null 2>&1 || true
     sysctl -w net.core.netdev_max_backlog=2048 >/dev/null 2>&1 || true
     sysctl -w net.netfilter.nf_conntrack_udp_timeout_stream=60 >/dev/null 2>&1 || true
 
@@ -44,7 +43,8 @@ start_service() {
 
     local COMMON_ARGS="--user=daemon --bind-fix4 \
         --filter-tcp=443 \
-        --dpi-desync=fake \
+        --dpi-desync=fake,split \
+        --dpi-desync-split-pos=1 \
         --dpi-desync-ttl=3 \
         --dpi-desync-repeats=1 \
         --dpi-desync-fooling=badsum \
@@ -52,7 +52,8 @@ start_service() {
         --dpi-desync-cutoff=d3 \
         --new \
         --filter-tcp=80 \
-        --dpi-desync=fake \
+        --dpi-desync=fake,split \
+        --dpi-desync-split-pos=method+2 \
         --dpi-desync-ttl=4 \
         --dpi-desync-repeats=1 \
         --dpi-desync-fooling=badsum \
@@ -117,8 +118,8 @@ start_service() {
     fi
 
     if [ "$QUIC_MODE" = "block" ]; then
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport { 80, 443 } reject with icmp type port-unreachable 2>/dev/null || \
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport { 80, 443 } reject 2>/dev/null || true
+        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 reject with icmp type port-unreachable 2>/dev/null || \
+        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 reject 2>/dev/null || true
     fi
 
     nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 443 ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null
@@ -134,7 +135,6 @@ start_service() {
 }
 
 stop_service() {
-    killall -q -9 nfqws 2>/dev/null
     nft delete table inet zapret 2>/dev/null || true
 }
 
