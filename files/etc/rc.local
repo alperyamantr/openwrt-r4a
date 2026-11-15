@@ -10,21 +10,19 @@ RATE="7200kbit"      # 8 Mbps upload hattina gore %90 bufferbloat optimizasyonu
 VIP_RATE="300kbit"   # Oyun ve ses trafigi icin garantili bant
 
 # Alias Tanimlama (SSH'ta 'cs2' veya 'qos' yazip izlemek icin)
-if ! grep -q "alias qos=" /etc/profile; then
-    echo "alias qos='tc -s class show dev $IFACE'" >> /etc/profile
-    echo "alias cs2='tc -s class show dev $IFACE'" >> /etc/profile
-fi
+sed -i '/alias qos=/d; /alias cs2=/d' /etc/profile 2>/dev/null
+echo "alias qos='tc -s class show dev $IFACE'" >> /etc/profile
+echo "alias cs2='tc -s class show dev $IFACE classid 1:10'" >> /etc/profile
 
 # Temizlik
 tc qdisc del dev $IFACE root 2>/dev/null
-nft delete table inet cs2_qos 2>/dev/null
 
 # Ana HTB Koku (Burst: 6400b)
 tc qdisc add dev $IFACE root handle 1: htb default 11
 tc class add dev $IFACE parent 1: classid 1:1 htb rate $RATE ceil $RATE burst 6400b cburst 6400b
 
 # 1:10 - OYUN / CANLI / VIP SINIFI (prio 0)
-tc class add dev $IFACE parent 1:1 classid 1:10 htb rate $VIP_RATE ceil $RATE prio 0 quantum 1514 burst 3200b cburst 3200b
+tc class add dev $IFACE parent 1:1 classid 1:10 htb rate $VIP_RATE ceil 2400kbit prio 0 quantum 1514 burst 3200b cburst 3200b
 tc qdisc add dev $IFACE parent 1:10 handle 10: fq_codel limit 1024 flows 128 quantum 300 target 5ms interval 40ms
 
 # 1:11 - GENEL TRAFIK (prio 1)
@@ -66,5 +64,11 @@ vip 0x2780 0xff80
 vip 0x2800 0xf800
 vip 0x3000 0xf000
 vip 0x4000 0xf000
+
+# DSCP 46 (EF - Windows & Oyun Oncelikli VIP)
+tc filter add dev $IFACE parent 1: protocol ip prio 1 u32 match ip tos 0xb8 0xfc flowid 1:10
+
+# Discord & High UDP Relays (49152-65535)
+vip 0xc000 0xc000
 
 exit 0

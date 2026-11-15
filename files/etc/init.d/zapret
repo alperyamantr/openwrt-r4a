@@ -7,7 +7,7 @@ FLOWOFFLOAD="software"
 QUIC_MODE="block"
 WAN_IF="wan"
 LAN_IF="br-lan"
-QUEUE_PKTS=6
+QUEUE_PKTS=5
 NFQWS_BIN="/opt/zapret/nfqws"
 FAKE_DIR="/opt/zapret/files/fake"
 
@@ -18,6 +18,10 @@ start_service() {
     sysctl -w net.netfilter.nf_conntrack_max=16384 >/dev/null 2>&1 || true
     sysctl -w net.core.netdev_max_backlog=2048 >/dev/null 2>&1 || true
     sysctl -w net.netfilter.nf_conntrack_udp_timeout_stream=60 >/dev/null 2>&1 || true
+
+    local WAN_DEV
+    WAN_DEV="$(ifstatus "$WAN_IF" 2>/dev/null | jsonfilter -e '@.l3_device')"
+    [ -z "$WAN_DEV" ] && WAN_DEV="$WAN_IF"
 
     if [ ! -d "$FAKE_DIR" ] && [ -d "/etc/zapret/fake" ]; then
         FAKE_DIR="/etc/zapret/fake"
@@ -41,12 +45,12 @@ start_service() {
     [ -s "$FAKE_DIR/quic_initial_www_google_com.bin" ] && \
         FAKE_QUIC="--dpi-desync-fake-quic=$FAKE_DIR/quic_initial_www_google_com.bin"
 
-    local COMMON_ARGS="--user=daemon --bind-fix4 \
+    local COMMON_ARGS="--user=daemon --bind-fix4 --dpi-desync-fwmark=0x40000000 \
         --filter-tcp=443 \
-        --dpi-desync=fake,split \
+        --dpi-desync=fake,split2 \
         --dpi-desync-split-pos=1 \
-        --dpi-desync-ttl=3 \
-        --dpi-desync-repeats=1 \
+        --dpi-desync-ttl=5 \
+        --dpi-desync-repeats=2 \
         --dpi-desync-fooling=badsum \
         $FAKE_TLS \
         --dpi-desync-cutoff=d3 \
@@ -55,13 +59,13 @@ start_service() {
         --dpi-desync=fake,split \
         --dpi-desync-split-pos=method+2 \
         --dpi-desync-ttl=4 \
-        --dpi-desync-repeats=1 \
+        --dpi-desync-repeats=2 \
         --dpi-desync-fooling=badsum \
         --new \
         --filter-udp=19294-19344,50000-60000 \
         --dpi-desync=fake \
         --dpi-desync-ttl=4 \
-        --dpi-desync-repeats=1 \
+        --dpi-desync-repeats=2 \
         --dpi-desync-any-protocol \
         --dpi-desync-cutoff=n2 \
         $FAKE_DISCORD \
@@ -69,7 +73,7 @@ start_service() {
         --filter-udp=3478-3480,4379-4380 \
         --dpi-desync=fake \
         --dpi-desync-ttl=4 \
-        --dpi-desync-repeats=1 \
+        --dpi-desync-repeats=2 \
         --dpi-desync-any-protocol \
         --dpi-desync-cutoff=n2 \
         $FAKE_STUN"
@@ -80,7 +84,7 @@ start_service() {
             --filter-udp=443 \
             --dpi-desync=fake \
             --dpi-desync-ttl=3 \
-            --dpi-desync-repeats=1 \
+            --dpi-desync-repeats=2 \
             --dpi-desync-any-protocol \
             --dpi-desync-cutoff=n2 \
             $FAKE_QUIC"
@@ -98,43 +102,46 @@ start_service() {
     procd_set_param oom_score_adj -500
     procd_close_instance
 
+    nft delete table ip zapret 2>/dev/null || true
     nft delete table inet zapret 2>/dev/null || true
-    nft add table inet zapret 2>/dev/null || true
-    nft add chain inet zapret forward '{ type filter hook forward priority -150; policy accept; }' 2>/dev/null || true
+    nft add table ip zapret 2>/dev/null || true
+    nft add chain ip zapret forward '{ type filter hook forward priority 0; policy accept; }' 2>/dev/null || true
 
-    nft add set inet zapret udp_ports '{ type inet_service; flags interval; }' 2>/dev/null || true
-    nft add element inet zapret udp_ports '{ 19294-19344, 50000-60000, 3478-3480, 4379-4380 }' 2>/dev/null || true
+    nft add rule ip zapret forward mark and 0x40000000 != 0 accept 2>/dev/null || true
+
+    nft add set ip zapret udp_ports '{ type inet_service; flags interval; }' 2>/dev/null || true
+    nft add element ip zapret udp_ports '{ 19294-19344, 50000-60000, 3478-3480, 4379-4380 }' 2>/dev/null || true
+    [ "$QUIC_MODE" = "desync" ] && nft add element ip zapret udp_ports '{ 443 }' 2>/dev/null || true
+
+    if [ "$QUIC_MODE" = "block" ]; then
+        nft add rule ip zapret forward oifname "$WAN_DEV" ip protocol udp udp dport 443 reject with icmp type port-unreachable 2>/dev/null || \
+        nft add rule ip zapret forward oifname "$WAN_DEV" ip protocol udp udp dport 443 reject 2>/dev/null || true
+    fi
 
     local BYPASS_IPS="/etc/zapret-bypass-ips.txt"
     if [ -f "$BYPASS_IPS" ]; then
+        nft add set ip zapret bypass_v4 '{ type ipv4_addr; flags interval; }' 2>/dev/null || true
         while IFS= read -r ip; do
             ip="$(printf '%s' "$ip" | tr -d '\r' | tr -d ' ')"
             case "$ip" in
-                ""|\#*) continue ;;
-                *:*) nft add rule inet zapret forward ip6 daddr "$ip" accept 2>/dev/null ;;
-                *)   nft add rule inet zapret forward ip daddr "$ip" accept 2>/dev/null ;;
+                ""|\#*|-*|*:*) continue ;;
+                *) nft add element ip zapret bypass_v4 "{ $ip }" 2>/dev/null || true ;;
             esac
         done < "$BYPASS_IPS"
+        nft add rule ip zapret forward ip daddr @bypass_v4 accept 2>/dev/null || true
     fi
-
-    if [ "$QUIC_MODE" = "block" ]; then
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 reject with icmp type port-unreachable 2>/dev/null || \
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport 443 reject 2>/dev/null || true
-    fi
-
-    nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 443 ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null
-    nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 80 ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null
-    nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport @udp_ports ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null
 
     if [ "$FLOWOFFLOAD" = "software" ]; then
-        nft add flowtable inet zapret ft "{ hook ingress priority 0; devices = { $LAN_IF, $WAN_IF }; }" 2>/dev/null || true
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 443 ct original packets ">$QUEUE_PKTS" flow add @ft 2>/dev/null
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol tcp tcp dport 80 ct original packets ">$QUEUE_PKTS" flow add @ft 2>/dev/null
-        nft add rule inet zapret forward oifname "$WAN_IF" ip protocol udp udp dport @udp_ports ct original packets ">$QUEUE_PKTS" flow add @ft 2>/dev/null
+        nft add flowtable ip zapret ft "{ hook ingress priority 0; devices = { $LAN_IF, $WAN_DEV }; }" 2>/dev/null || true
+        nft add rule ip zapret forward ip protocol { tcp, udp } ct state established ct original packets ">$QUEUE_PKTS" flow add @ft 2>/dev/null || true
     fi
+
+    nft add rule ip zapret forward oifname "$WAN_DEV" ip protocol tcp tcp dport { 80, 443 } ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null || true
+    nft add rule ip zapret forward oifname "$WAN_DEV" ip protocol udp udp dport @udp_ports ct original packets 1-$QUEUE_PKTS queue flags bypass,fanout to 80-81 2>/dev/null || true
 }
 
 stop_service() {
+    nft delete table ip zapret 2>/dev/null || true
     nft delete table inet zapret 2>/dev/null || true
 }
 

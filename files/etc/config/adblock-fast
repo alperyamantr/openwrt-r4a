@@ -168,3 +168,8 @@ config file_url
 	option name 'Hagezi TikTok Native'
 	option size '16800'
 
+
+config file_url
+	option name 'Hagezi - DoH Bypass'
+	option url 'https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/doh-onlydomains.txt'
+	option action 'block'
